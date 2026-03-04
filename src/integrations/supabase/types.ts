@@ -14,7 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      recruitment_leads: {
+        Row: {
+          availability: string
+          benefits_selected: string[]
+          candidate_name: string
+          candidate_phone: string
+          client_id: string
+          created_at: string
+          id: string
+          qualification: string
+          trade_type: string
+        }
+        Insert: {
+          availability: string
+          benefits_selected?: string[]
+          candidate_name: string
+          candidate_phone: string
+          client_id: string
+          created_at?: string
+          id?: string
+          qualification: string
+          trade_type: string
+        }
+        Update: {
+          availability?: string
+          benefits_selected?: string[]
+          candidate_name?: string
+          candidate_phone?: string
+          client_id?: string
+          created_at?: string
+          id?: string
+          qualification?: string
+          trade_type?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
