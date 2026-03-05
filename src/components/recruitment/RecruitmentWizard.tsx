@@ -7,6 +7,8 @@ import { StepBenefits } from "./steps/StepBenefits";
 import { StepAvailability } from "./steps/StepAvailability";
 import { StepContact } from "./steps/StepContact";
 import { StepSuccess } from "./steps/StepSuccess";
+import { StepExperience } from "./steps/StepExperience";
+import { StepDriversLicense } from "./steps/StepDriversLicense";
 import { ProgressBar } from "./ProgressBar";
 
 interface RecruitmentWizardProps {
@@ -17,6 +19,8 @@ interface RecruitmentWizardProps {
 
 export interface WizardData {
   qualification: string;
+  experience: string;
+  driversLicense: string;
   benefits: string[];
   availability: string;
   name: string;
@@ -24,7 +28,7 @@ export interface WizardData {
   consent: boolean;
 }
 
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 7;
 
 const slideVariants = {
   enter: (direction: number) => ({
@@ -48,6 +52,8 @@ export const RecruitmentWizard = ({ clientId, tradeType, supabaseClient }: Recru
   const [submitted, setSubmitted] = useState(false);
   const [data, setData] = useState<WizardData>({
     qualification: "",
+    experience: "",
+    driversLicense: "",
     benefits: [],
     availability: "",
     name: "",
@@ -76,6 +82,8 @@ export const RecruitmentWizard = ({ clientId, tradeType, supabaseClient }: Recru
         client_id: clientId,
         trade_type: tradeType,
         qualification: data.qualification,
+        years_of_experience: data.experience,
+        drivers_license_class: data.driversLicense,
         benefits_selected: data.benefits,
         availability: data.availability,
         candidate_name: data.name,
@@ -99,10 +107,14 @@ export const RecruitmentWizard = ({ clientId, tradeType, supabaseClient }: Recru
       case 1:
         return <StepQualification value={data.qualification} onChange={(v) => updateData({ qualification: v })} onNext={next} onBack={back} />;
       case 2:
-        return <StepBenefits value={data.benefits} onChange={(v) => updateData({ benefits: v })} onNext={next} onBack={back} />;
+        return <StepExperience value={data.experience} onChange={(v) => updateData({ experience: v })} onNext={next} onBack={back} />;
       case 3:
-        return <StepAvailability value={data.availability} onChange={(v) => updateData({ availability: v })} onNext={next} onBack={back} />;
+        return <StepDriversLicense value={data.driversLicense} onChange={(v) => updateData({ driversLicense: v })} onNext={next} onBack={back} />;
       case 4:
+        return <StepBenefits value={data.benefits} onChange={(v) => updateData({ benefits: v })} onNext={next} onBack={back} />;
+      case 5:
+        return <StepAvailability value={data.availability} onChange={(v) => updateData({ availability: v })} onNext={next} onBack={back} />;
+      case 6:
         return <StepContact data={data} onChange={updateData} onSubmit={submit} onBack={back} loading={loading} />;
       default:
         return null;

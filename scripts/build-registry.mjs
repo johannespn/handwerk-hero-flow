@@ -33,6 +33,8 @@ const registry = {
     file("components/recruitment/SelectionCard.tsx"),
     file("components/recruitment/WizardButton.tsx"),
     file("components/recruitment/steps/StepIntro.tsx"),
+    file("components/recruitment/steps/StepExperience.tsx"),
+    file("components/recruitment/steps/StepDriversLicense.tsx"),
     file("components/recruitment/steps/StepQualification.tsx"),
     file("components/recruitment/steps/StepBenefits.tsx"),
     file("components/recruitment/steps/StepAvailability.tsx"),
