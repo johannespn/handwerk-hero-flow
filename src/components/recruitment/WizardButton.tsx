@@ -8,6 +8,7 @@ interface WizardButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 export const WizardButton = ({ variant = "primary", className, children, ...props }: WizardButtonProps) => {
   return (
     <button
+      data-wizard-btn
       className={cn(
         "w-full py-4 px-6 rounded-xl text-lg font-semibold transition-all duration-200 active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none",
         variant === "primary" && "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg",
