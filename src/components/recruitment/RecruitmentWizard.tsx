@@ -127,7 +127,7 @@ export const RecruitmentWizard = ({ clientId, tradeType, supabaseClient }: Recru
         <motion.div layout transition={{ layout: { duration: 0.3, ease: "easeInOut" } }} className="bg-card rounded-2xl shadow-xl overflow-hidden">
           {!submitted && <ProgressBar current={step} total={TOTAL_STEPS} />}
           <div className="p-6 sm:p-8 flex flex-col">
-            <AnimatePresence mode="popLayout" custom={direction}>
+            <AnimatePresence mode="wait" custom={direction}>
               <motion.div
                 key={step + (submitted ? "-done" : "")}
                 custom={direction}
