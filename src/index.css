@@ -8,35 +8,43 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 216 30% 97%;
+    --foreground: 215 50% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 215 50% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 215 50% 10%;
 
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 215 80% 22%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 210 25% 92%;
+    --secondary-foreground: 215 50% 10%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 210 20% 94%;
+    --muted-foreground: 215 15% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 38 95% 55%;
+    --accent-foreground: 215 50% 10%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 214 25% 88%;
+    --input: 214 25% 88%;
+    --ring: 215 80% 22%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+
+    --trade-blue: 215 80% 22%;
+    --trade-blue-light: 215 60% 35%;
+    --trade-navy: 220 50% 12%;
+    --trade-amber: 38 95% 55%;
+    --trade-amber-dark: 30 90% 45%;
+    --trade-success: 145 65% 42%;
+    --trade-steel: 215 15% 60%;
 
     --sidebar-background: 0 0% 98%;
 
