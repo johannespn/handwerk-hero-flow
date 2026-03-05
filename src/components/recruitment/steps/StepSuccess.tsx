@@ -13,7 +13,7 @@ export const StepSuccess = ({ tradeType }: StepSuccessProps) => {
         animate={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 200, damping: 15 }}
       >
-        <CheckCircle2 className="w-20 h-20 text-[hsl(var(--trade-success))]" />
+        <CheckCircle2 className="w-20 h-20 text-primary" />
       </motion.div>
       <div>
         <h2 className="text-2xl font-bold text-foreground">Top, das hat geklappt! 🎉</h2>

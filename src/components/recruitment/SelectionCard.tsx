@@ -17,7 +17,7 @@ export const SelectionCard = ({ label, icon, selected, onClick }: SelectionCardP
         "w-full py-4 px-5 rounded-xl text-left text-lg font-medium transition-all duration-200 border-2",
         selected
           ? "bg-primary text-primary-foreground border-primary shadow-md"
-          : "bg-card text-card-foreground border-border hover:border-[hsl(var(--trade-steel))]"
+          : "bg-card text-card-foreground border-border hover:border-primary/40"
       )}
     >
       {icon && <span className="mr-3">{icon}</span>}

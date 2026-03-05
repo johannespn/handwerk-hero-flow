@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { supabase } from "@/integrations/supabase/client";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { StepIntro } from "./steps/StepIntro";
 import { StepQualification } from "./steps/StepQualification";
 import { StepBenefits } from "./steps/StepBenefits";
@@ -12,6 +12,7 @@ import { ProgressBar } from "./ProgressBar";
 interface RecruitmentWizardProps {
   clientId: string;
   tradeType: string;
+  supabaseClient: SupabaseClient;
 }
 
 export interface WizardData {
@@ -40,7 +41,7 @@ const slideVariants = {
   }),
 };
 
-export const RecruitmentWizard = ({ clientId, tradeType }: RecruitmentWizardProps) => {
+export const RecruitmentWizard = ({ clientId, tradeType, supabaseClient }: RecruitmentWizardProps) => {
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -71,7 +72,7 @@ export const RecruitmentWizard = ({ clientId, tradeType }: RecruitmentWizardProp
   const submit = async () => {
     setLoading(true);
     try {
-      const { error } = await supabase.from("recruitment_leads").insert({
+      const { error } = await supabaseClient.from("recruitment_leads").insert({
         client_id: clientId,
         trade_type: tradeType,
         qualification: data.qualification,
@@ -111,7 +112,7 @@ export const RecruitmentWizard = ({ clientId, tradeType }: RecruitmentWizardProp
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-lg">
-        <div className="bg-card rounded-2xl shadow-wizard overflow-hidden">
+        <div className="bg-card rounded-2xl shadow-xl overflow-hidden">
           {!submitted && <ProgressBar current={step} total={TOTAL_STEPS} />}
           <div className="p-6 sm:p-8 min-h-[420px] flex flex-col">
             <AnimatePresence mode="wait" custom={direction}>
