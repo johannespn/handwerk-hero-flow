@@ -27,38 +27,6 @@ const registry = {
     "Animated 5-step recruitment wizard for collecting candidate leads. Submits to a Supabase `recruitment_leads` table. Pass your supabaseClient, clientId, and tradeType as props.",
   dependencies: ["framer-motion"],
   registryDependencies: ["utils"],
-  tailwind: {
-    config: {
-      theme: {
-        extend: {
-          boxShadow: {
-            wizard:
-              "0 20px 60px -15px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.04)",
-          },
-        },
-      },
-    },
-  },
-  cssVars: {
-    light: {
-      "--trade-blue": "215 80% 22%",
-      "--trade-blue-light": "215 60% 35%",
-      "--trade-navy": "220 50% 12%",
-      "--trade-amber": "38 95% 55%",
-      "--trade-amber-dark": "30 90% 45%",
-      "--trade-success": "145 65% 42%",
-      "--trade-steel": "215 15% 60%",
-    },
-    dark: {
-      "--trade-blue": "215 60% 55%",
-      "--trade-blue-light": "215 60% 65%",
-      "--trade-navy": "220 50% 85%",
-      "--trade-amber": "38 95% 65%",
-      "--trade-amber-dark": "30 90% 55%",
-      "--trade-success": "145 65% 52%",
-      "--trade-steel": "215 15% 70%",
-    },
-  },
   files: [
     file("components/recruitment/RecruitmentWizard.tsx"),
     file("components/recruitment/ProgressBar.tsx"),
