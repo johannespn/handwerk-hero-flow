@@ -13,6 +13,9 @@ export default {
       },
     },
     extend: {
+      boxShadow: {
+        wizard: "0 20px 60px -15px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.04)",
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
