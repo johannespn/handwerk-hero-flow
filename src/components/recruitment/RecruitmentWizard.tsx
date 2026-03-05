@@ -124,10 +124,10 @@ export const RecruitmentWizard = ({ clientId, tradeType, supabaseClient }: Recru
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-lg">
-        <div className="bg-card rounded-2xl shadow-xl overflow-hidden">
+        <motion.div layout transition={{ layout: { duration: 0.3, ease: "easeInOut" } }} className="bg-card rounded-2xl shadow-xl overflow-hidden">
           {!submitted && <ProgressBar current={step} total={TOTAL_STEPS} />}
-          <div className="p-6 sm:p-8 min-h-[420px] flex flex-col">
-            <AnimatePresence mode="wait" custom={direction}>
+          <div className="p-6 sm:p-8 flex flex-col">
+            <AnimatePresence mode="popLayout" custom={direction}>
               <motion.div
                 key={step + (submitted ? "-done" : "")}
                 custom={direction}
@@ -136,13 +136,13 @@ export const RecruitmentWizard = ({ clientId, tradeType, supabaseClient }: Recru
                 animate="center"
                 exit="exit"
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="flex-1 flex flex-col"
+                className="flex flex-col"
               >
                 {renderStep()}
               </motion.div>
             </AnimatePresence>
           </div>
-        </div>
+        </motion.div>
         <p className="text-center text-xs text-muted-foreground mt-4 opacity-60">
           Powered by professionelles Recruiting
         </p>
