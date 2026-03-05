@@ -1,0 +1,96 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "recruitment-wizard",
+  "type": "registry:block",
+  "title": "Recruitment Wizard",
+  "description": "Animated 5-step recruitment wizard for collecting candidate leads. Submits to a Supabase `recruitment_leads` table. Pass your supabaseClient, clientId, and tradeType as props.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [
+    "utils"
+  ],
+  "tailwind": {
+    "config": {
+      "theme": {
+        "extend": {
+          "boxShadow": {
+            "wizard": "0 20px 60px -15px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.04)"
+          }
+        }
+      }
+    }
+  },
+  "cssVars": {
+    "light": {
+      "--trade-blue": "215 80% 22%",
+      "--trade-blue-light": "215 60% 35%",
+      "--trade-navy": "220 50% 12%",
+      "--trade-amber": "38 95% 55%",
+      "--trade-amber-dark": "30 90% 45%",
+      "--trade-success": "145 65% 42%",
+      "--trade-steel": "215 15% 60%"
+    },
+    "dark": {
+      "--trade-blue": "215 60% 55%",
+      "--trade-blue-light": "215 60% 65%",
+      "--trade-navy": "220 50% 85%",
+      "--trade-amber": "38 95% 65%",
+      "--trade-amber-dark": "30 90% 55%",
+      "--trade-success": "145 65% 52%",
+      "--trade-steel": "215 15% 70%"
+    }
+  },
+  "files": [
+    {
+      "path": "components/recruitment/RecruitmentWizard.tsx",
+      "content": "import { useState } from \"react\";\nimport { motion, AnimatePresence } from \"framer-motion\";\nimport type { SupabaseClient } from \"@supabase/supabase-js\";\nimport { StepIntro } from \"./steps/StepIntro\";\nimport { StepQualification } from \"./steps/StepQualification\";\nimport { StepBenefits } from \"./steps/StepBenefits\";\nimport { StepAvailability } from \"./steps/StepAvailability\";\nimport { StepContact } from \"./steps/StepContact\";\nimport { StepSuccess } from \"./steps/StepSuccess\";\nimport { ProgressBar } from \"./ProgressBar\";\n\ninterface RecruitmentWizardProps {\n  clientId: string;\n  tradeType: string;\n  supabaseClient: SupabaseClient;\n}\n\nexport interface WizardData {\n  qualification: string;\n  benefits: string[];\n  availability: string;\n  name: string;\n  phone: string;\n  consent: boolean;\n}\n\nconst TOTAL_STEPS = 5;\n\nconst slideVariants = {\n  enter: (direction: number) => ({\n    x: direction > 0 ? 300 : -300,\n    opacity: 0,\n  }),\n  center: {\n    x: 0,\n    opacity: 1,\n  },\n  exit: (direction: number) => ({\n    x: direction > 0 ? -300 : 300,\n    opacity: 0,\n  }),\n};\n\nexport const RecruitmentWizard = ({ clientId, tradeType, supabaseClient }: RecruitmentWizardProps) => {\n  const [step, setStep] = useState(0);\n  const [direction, setDirection] = useState(1);\n  const [loading, setLoading] = useState(false);\n  const [submitted, setSubmitted] = useState(false);\n  const [data, setData] = useState<WizardData>({\n    qualification: \"\",\n    benefits: [],\n    availability: \"\",\n    name: \"\",\n    phone: \"\",\n    consent: false,\n  });\n\n  const next = () => {\n    setDirection(1);\n    setStep((s) => Math.min(s + 1, TOTAL_STEPS));\n  };\n\n  const back = () => {\n    setDirection(-1);\n    setStep((s) => Math.max(s - 1, 0));\n  };\n\n  const updateData = (partial: Partial<WizardData>) => {\n    setData((prev) => ({ ...prev, ...partial }));\n  };\n\n  const submit = async () => {\n    setLoading(true);\n    try {\n      const { error } = await supabaseClient.from(\"recruitment_leads\").insert({\n        client_id: clientId,\n        trade_type: tradeType,\n        qualification: data.qualification,\n        benefits_selected: data.benefits,\n        availability: data.availability,\n        candidate_name: data.name,\n        candidate_phone: data.phone,\n      });\n      if (error) throw error;\n      setSubmitted(true);\n      setStep(TOTAL_STEPS);\n    } catch (err) {\n      console.error(\"Submission error:\", err);\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  const renderStep = () => {\n    if (submitted) return <StepSuccess tradeType={tradeType} />;\n    switch (step) {\n      case 0:\n        return <StepIntro tradeType={tradeType} onNext={next} />;\n      case 1:\n        return <StepQualification value={data.qualification} onChange={(v) => updateData({ qualification: v })} onNext={next} onBack={back} />;\n      case 2:\n        return <StepBenefits value={data.benefits} onChange={(v) => updateData({ benefits: v })} onNext={next} onBack={back} />;\n      case 3:\n        return <StepAvailability value={data.availability} onChange={(v) => updateData({ availability: v })} onNext={next} onBack={back} />;\n      case 4:\n        return <StepContact data={data} onChange={updateData} onSubmit={submit} onBack={back} loading={loading} />;\n      default:\n        return null;\n    }\n  };\n\n  return (\n    <div className=\"min-h-screen flex items-center justify-center bg-background p-4\">\n      <div className=\"w-full max-w-lg\">\n        <div className=\"bg-card rounded-2xl shadow-wizard overflow-hidden\">\n          {!submitted && <ProgressBar current={step} total={TOTAL_STEPS} />}\n          <div className=\"p-6 sm:p-8 min-h-[420px] flex flex-col\">\n            <AnimatePresence mode=\"wait\" custom={direction}>\n              <motion.div\n                key={step + (submitted ? \"-done\" : \"\")}\n                custom={direction}\n                variants={slideVariants}\n                initial=\"enter\"\n                animate=\"center\"\n                exit=\"exit\"\n                transition={{ duration: 0.3, ease: \"easeInOut\" }}\n                className=\"flex-1 flex flex-col\"\n              >\n                {renderStep()}\n              </motion.div>\n            </AnimatePresence>\n          </div>\n        </div>\n        <p className=\"text-center text-xs text-muted-foreground mt-4 opacity-60\">\n          Powered by professionelles Recruiting\n        </p>\n      </div>\n    </div>\n  );\n};\n",
+      "type": "registry:component"
+    },
+    {
+      "path": "components/recruitment/ProgressBar.tsx",
+      "content": "import { motion } from \"framer-motion\";\n\ninterface ProgressBarProps {\n  current: number;\n  total: number;\n}\n\nexport const ProgressBar = ({ current, total }: ProgressBarProps) => {\n  const progress = (current / total) * 100;\n\n  return (\n    <div className=\"h-1.5 bg-secondary w-full\">\n      <motion.div\n        className=\"h-full bg-accent rounded-r-full\"\n        initial={{ width: 0 }}\n        animate={{ width: `${progress}%` }}\n        transition={{ duration: 0.4, ease: \"easeOut\" }}\n      />\n    </div>\n  );\n};\n",
+      "type": "registry:component"
+    },
+    {
+      "path": "components/recruitment/SelectionCard.tsx",
+      "content": "import { cn } from \"@/lib/utils\";\nimport { motion } from \"framer-motion\";\n\ninterface SelectionCardProps {\n  label: string;\n  icon?: string;\n  selected: boolean;\n  onClick: () => void;\n}\n\nexport const SelectionCard = ({ label, icon, selected, onClick }: SelectionCardProps) => {\n  return (\n    <motion.button\n      whileTap={{ scale: 0.96 }}\n      onClick={onClick}\n      className={cn(\n        \"w-full py-4 px-5 rounded-xl text-left text-lg font-medium transition-all duration-200 border-2\",\n        selected\n          ? \"bg-primary text-primary-foreground border-primary shadow-md\"\n          : \"bg-card text-card-foreground border-border hover:border-[hsl(var(--trade-steel))]\"\n      )}\n    >\n      {icon && <span className=\"mr-3\">{icon}</span>}\n      {label}\n    </motion.button>\n  );\n};\n",
+      "type": "registry:component"
+    },
+    {
+      "path": "components/recruitment/WizardButton.tsx",
+      "content": "import { ButtonHTMLAttributes } from \"react\";\nimport { cn } from \"@/lib/utils\";\n\ninterface WizardButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {\n  variant?: \"primary\" | \"secondary\" | \"ghost\";\n}\n\nexport const WizardButton = ({ variant = \"primary\", className, children, ...props }: WizardButtonProps) => {\n  return (\n    <button\n      className={cn(\n        \"w-full py-4 px-6 rounded-xl text-lg font-semibold transition-all duration-200 active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none\",\n        variant === \"primary\" && \"bg-primary text-primary-foreground hover:bg-[hsl(var(--trade-blue-light))] shadow-lg\",\n        variant === \"secondary\" && \"bg-secondary text-secondary-foreground hover:bg-muted border border-border\",\n        variant === \"ghost\" && \"text-muted-foreground hover:text-foreground\",\n        className\n      )}\n      {...props}\n    >\n      {children}\n    </button>\n  );\n};\n",
+      "type": "registry:component"
+    },
+    {
+      "path": "components/recruitment/steps/StepIntro.tsx",
+      "content": "import { WizardButton } from \"../WizardButton\";\nimport { Wrench } from \"lucide-react\";\n\ninterface StepIntroProps {\n  tradeType: string;\n  onNext: () => void;\n}\n\nexport const StepIntro = ({ tradeType, onNext }: StepIntroProps) => {\n  return (\n    <div className=\"flex-1 flex flex-col items-center justify-center text-center gap-6\">\n      <div className=\"w-16 h-16 rounded-2xl bg-accent/20 flex items-center justify-center\">\n        <Wrench className=\"w-8 h-8 text-accent\" />\n      </div>\n      <div>\n        <h1 className=\"text-2xl sm:text-3xl font-bold text-foreground leading-tight\">\n          Bereit für einen Tapetenwechsel?\n        </h1>\n        <p className=\"mt-3 text-muted-foreground text-base sm:text-lg\">\n          Prüfe in 60 Sekunden, ob wir als {tradeType} zusammenpassen.\n        </p>\n      </div>\n      <div className=\"w-full mt-auto pt-6\">\n        <WizardButton onClick={onNext}>Los geht's 🚀</WizardButton>\n      </div>\n    </div>\n  );\n};\n",
+      "type": "registry:component"
+    },
+    {
+      "path": "components/recruitment/steps/StepQualification.tsx",
+      "content": "import { SelectionCard } from \"../SelectionCard\";\nimport { WizardButton } from \"../WizardButton\";\nimport { ArrowLeft } from \"lucide-react\";\n\ninterface StepQualificationProps {\n  value: string;\n  onChange: (v: string) => void;\n  onNext: () => void;\n  onBack: () => void;\n}\n\nconst options = [\n  { label: \"Meister\", icon: \"🏅\" },\n  { label: \"Geselle\", icon: \"🔧\" },\n  { label: \"Azubi\", icon: \"📚\" },\n  { label: \"Quereinsteiger\", icon: \"🔄\" },\n];\n\nexport const StepQualification = ({ value, onChange, onNext, onBack }: StepQualificationProps) => {\n  const handleSelect = (opt: string) => {\n    onChange(opt);\n    setTimeout(onNext, 300);\n  };\n\n  return (\n    <div className=\"flex-1 flex flex-col gap-4\">\n      <button onClick={onBack} className=\"self-start text-muted-foreground hover:text-foreground transition-colors\">\n        <ArrowLeft className=\"w-5 h-5\" />\n      </button>\n      <h2 className=\"text-xl sm:text-2xl font-bold text-foreground\">Was bringst du mit?</h2>\n      <div className=\"flex flex-col gap-3 mt-2\">\n        {options.map((opt) => (\n          <SelectionCard\n            key={opt.label}\n            label={opt.label}\n            icon={opt.icon}\n            selected={value === opt.label}\n            onClick={() => handleSelect(opt.label)}\n          />\n        ))}\n      </div>\n    </div>\n  );\n};\n",
+      "type": "registry:component"
+    },
+    {
+      "path": "components/recruitment/steps/StepBenefits.tsx",
+      "content": "import { SelectionCard } from \"../SelectionCard\";\nimport { WizardButton } from \"../WizardButton\";\nimport { ArrowLeft } from \"lucide-react\";\n\ninterface StepBenefitsProps {\n  value: string[];\n  onChange: (v: string[]) => void;\n  onNext: () => void;\n  onBack: () => void;\n}\n\nconst options = [\n  { label: \"4-Tage-Woche\", icon: \"📅\" },\n  { label: \"Firmenwagen\", icon: \"🚗\" },\n  { label: \"Modernes Werkzeug\", icon: \"🛠️\" },\n  { label: \"Übertarifliches Gehalt\", icon: \"💰\" },\n];\n\nexport const StepBenefits = ({ value, onChange, onNext, onBack }: StepBenefitsProps) => {\n  const toggle = (opt: string) => {\n    onChange(value.includes(opt) ? value.filter((v) => v !== opt) : [...value, opt]);\n  };\n\n  return (\n    <div className=\"flex-1 flex flex-col gap-4\">\n      <button onClick={onBack} className=\"self-start text-muted-foreground hover:text-foreground transition-colors\">\n        <ArrowLeft className=\"w-5 h-5\" />\n      </button>\n      <h2 className=\"text-xl sm:text-2xl font-bold text-foreground\">Was ist dir wichtig?</h2>\n      <p className=\"text-muted-foreground text-sm\">Wähle alles aus, was zutrifft.</p>\n      <div className=\"flex flex-col gap-3\">\n        {options.map((opt) => (\n          <SelectionCard\n            key={opt.label}\n            label={opt.label}\n            icon={opt.icon}\n            selected={value.includes(opt.label)}\n            onClick={() => toggle(opt.label)}\n          />\n        ))}\n      </div>\n      <div className=\"mt-auto pt-4\">\n        <WizardButton onClick={onNext} disabled={value.length === 0}>\n          Weiter\n        </WizardButton>\n      </div>\n    </div>\n  );\n};\n",
+      "type": "registry:component"
+    },
+    {
+      "path": "components/recruitment/steps/StepAvailability.tsx",
+      "content": "import { SelectionCard } from \"../SelectionCard\";\nimport { ArrowLeft } from \"lucide-react\";\n\ninterface StepAvailabilityProps {\n  value: string;\n  onChange: (v: string) => void;\n  onNext: () => void;\n  onBack: () => void;\n}\n\nconst options = [\n  { label: \"Sofort\", icon: \"⚡\" },\n  { label: \"In 1 Monat\", icon: \"📆\" },\n  { label: \"Nur mal umschauen\", icon: \"👀\" },\n];\n\nexport const StepAvailability = ({ value, onChange, onNext, onBack }: StepAvailabilityProps) => {\n  const handleSelect = (opt: string) => {\n    onChange(opt);\n    setTimeout(onNext, 300);\n  };\n\n  return (\n    <div className=\"flex-1 flex flex-col gap-4\">\n      <button onClick={onBack} className=\"self-start text-muted-foreground hover:text-foreground transition-colors\">\n        <ArrowLeft className=\"w-5 h-5\" />\n      </button>\n      <h2 className=\"text-xl sm:text-2xl font-bold text-foreground\">Ab wann wärst du startklar?</h2>\n      <div className=\"flex flex-col gap-3 mt-2\">\n        {options.map((opt) => (\n          <SelectionCard\n            key={opt.label}\n            label={opt.label}\n            icon={opt.icon}\n            selected={value === opt.label}\n            onClick={() => handleSelect(opt.label)}\n          />\n        ))}\n      </div>\n    </div>\n  );\n};\n",
+      "type": "registry:component"
+    },
+    {
+      "path": "components/recruitment/steps/StepContact.tsx",
+      "content": "import { WizardButton } from \"../WizardButton\";\nimport { ArrowLeft, Loader2 } from \"lucide-react\";\nimport type { WizardData } from \"../RecruitmentWizard\";\n\ninterface StepContactProps {\n  data: WizardData;\n  onChange: (partial: Partial<WizardData>) => void;\n  onSubmit: () => void;\n  onBack: () => void;\n  loading: boolean;\n}\n\nexport const StepContact = ({ data, onChange, onSubmit, onBack, loading }: StepContactProps) => {\n  const isValid = data.name.trim().length >= 2 && data.phone.trim().length >= 6 && data.consent;\n\n  return (\n    <div className=\"flex-1 flex flex-col gap-4\">\n      <button onClick={onBack} className=\"self-start text-muted-foreground hover:text-foreground transition-colors\">\n        <ArrowLeft className=\"w-5 h-5\" />\n      </button>\n      <h2 className=\"text-xl sm:text-2xl font-bold text-foreground\">Fast geschafft!</h2>\n      <p className=\"text-muted-foreground text-sm\">Wie können wir dich erreichen?</p>\n\n      <div className=\"flex flex-col gap-3 mt-2\">\n        <input\n          type=\"text\"\n          placeholder=\"Vorname\"\n          value={data.name}\n          onChange={(e) => onChange({ name: e.target.value })}\n          maxLength={100}\n          className=\"w-full py-4 px-5 rounded-xl text-lg bg-secondary text-secondary-foreground border-2 border-border focus:border-primary focus:outline-none transition-colors placeholder:text-muted-foreground\"\n        />\n        <input\n          type=\"tel\"\n          placeholder=\"Handynummer\"\n          value={data.phone}\n          onChange={(e) => onChange({ phone: e.target.value })}\n          maxLength={20}\n          className=\"w-full py-4 px-5 rounded-xl text-lg bg-secondary text-secondary-foreground border-2 border-border focus:border-primary focus:outline-none transition-colors placeholder:text-muted-foreground\"\n        />\n      </div>\n\n      <label className=\"flex items-start gap-3 mt-2 cursor-pointer\">\n        <input\n          type=\"checkbox\"\n          checked={data.consent}\n          onChange={(e) => onChange({ consent: e.target.checked })}\n          className=\"mt-1 w-5 h-5 rounded accent-primary\"\n        />\n        <span className=\"text-xs text-muted-foreground leading-relaxed\">\n          Ich stimme zu, dass meine Daten zur Kontaktaufnahme gespeichert werden.{\" \"}\n          <span className=\"text-foreground font-medium\">Datenschutz</span>\n        </span>\n      </label>\n\n      <div className=\"mt-auto pt-4\">\n        <WizardButton onClick={onSubmit} disabled={!isValid || loading}>\n          {loading ? (\n            <span className=\"flex items-center justify-center gap-2\">\n              <Loader2 className=\"w-5 h-5 animate-spin\" /> Wird gesendet...\n            </span>\n          ) : (\n            \"Jetzt bewerben ✅\"\n          )}\n        </WizardButton>\n      </div>\n    </div>\n  );\n};\n",
+      "type": "registry:component"
+    },
+    {
+      "path": "components/recruitment/steps/StepSuccess.tsx",
+      "content": "import { motion } from \"framer-motion\";\nimport { CheckCircle2 } from \"lucide-react\";\n\ninterface StepSuccessProps {\n  tradeType: string;\n}\n\nexport const StepSuccess = ({ tradeType }: StepSuccessProps) => {\n  return (\n    <div className=\"flex-1 flex flex-col items-center justify-center text-center gap-6\">\n      <motion.div\n        initial={{ scale: 0 }}\n        animate={{ scale: 1 }}\n        transition={{ type: \"spring\", stiffness: 200, damping: 15 }}\n      >\n        <CheckCircle2 className=\"w-20 h-20 text-[hsl(var(--trade-success))]\" />\n      </motion.div>\n      <div>\n        <h2 className=\"text-2xl font-bold text-foreground\">Top, das hat geklappt! 🎉</h2>\n        <p className=\"mt-3 text-muted-foreground text-base\">\n          Wir melden uns schnellstmöglich bei dir. Dein neuer Job als {tradeType} wartet!\n        </p>\n      </div>\n    </div>\n  );\n};\n",
+      "type": "registry:component"
+    }
+  ]
+}
